@@ -52,37 +52,40 @@ const App = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-4">Marbot</h1>
+   <div className="container mx-auto px-4 py-4 md:py-8 max-w-3xl">
+  <h1 className="text-2xl md:text-3xl font-bold text-center mb-4 text-[#66bb6a]">Marbot</h1>
 
-      <div className="chat-container rounded-lg shadow-md p-4">
-        <ChatHistory chatHistory={chatHistory} />
-        <Loading isLoading={isLoading} />
-      </div>
+  <div className="chat-container rounded-lg shadow-md p-4 bg-white mb-4 h-[60vh] overflow-y-auto">
+    <ChatHistory chatHistory={chatHistory} />
+    <Loading isLoading={isLoading} />
+  </div>
 
-      <div className="flex mt-4">
-        <input
-          type="text"
-          className="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Type your message..."
-          value={userInput}
-          onChange={handleUserInput}
-        />
-        <button
-          className="px-4 py-2 ml-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none"
-          onClick={sendMessage}
-          disabled={isLoading}
-        >
-          Send
-        </button>
-      </div>
+  <div className="flex flex-col sm:flex-row gap-2 mt-4">
+    <input
+      type="text"
+      className="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#66bb6a]"
+      placeholder="Type your message..."
+      value={userInput}
+      onChange={handleUserInput}
+      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+    />
+    <div className="flex gap-2">
       <button
-        className="mt-4 block px-4 py-2 rounded-lg bg-gray-400 text-white hover:bg-gray-500 focus:outline-none"
+        className="px-4 py-2 rounded-lg bg-[#66bb6a] text-white hover:bg-[#4caf50] focus:outline-none transition-colors flex-1"
+        onClick={sendMessage}
+        disabled={isLoading}
+      >
+        {isLoading ? 'Sending...' : 'Send'}
+      </button>
+      <button
+        className="px-4 py-2 rounded-lg bg-gray-400 text-white hover:bg-gray-500 focus:outline-none transition-colors"
         onClick={clearChat}
       >
-        Clear Chat
+        Clear
       </button>
     </div>
+  </div>
+</div>
   );
 };
 
