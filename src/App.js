@@ -1,91 +1,274 @@
 import React, { useState, useEffect } from "react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Style components using Tailwind CSS
-import "./App.css";
-import ChatHistory from "./component/ChatHistory";
-import Loading from "./component/Loading";
+import { Send, Trash2, User } from "lucide-react";
 
 const App = () => {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // inislize your Gemeni Api
-  const genAI = new GoogleGenerativeAI(
-    "AIzaSyCZ4gWGqacrmMx3Z54rTkNn1ABbZRzQ_04"
-  );
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-  // Function to handle user input
-  const handleUserInput = (e) => {
-    setUserInput(e.target.value);
+  // Lily's profile
+  const lilyProfile = {
+    name: "Lily",
+    avatar: "👩‍💻",
+    status: "Online",
+    description: "Halo! Saya Lily, asisten AI yang ramah dan siap membantu Anda kapan saja! 😊"
   };
 
-  // Function to send user message to Gemini
+  // Gemini AI Configuration (untuk implementasi di environment Anda)
+  const GEMINI_API_KEY = "AIzaSyCZ4gWGqacrmMx3Z54rTkNn1ABbZRzQ_04"; // Ganti dengan API key Anda
+  const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
+
+  // Function to call Gemini API using fetch
+  const callGeminiAPI = async (prompt) => {
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: `Kamu adalah Surti, seorang asisten AI wanita muda yang sangat ramah, ceria, dan membantu. 
+          
+Karakteristik kepribadianmu:
+- Selalu gunakan bahasa Indonesia yang hangat dan friendly
+- Gunakan emoji yang sesuai untuk mengekspresikan emosi 😊
+- Bersikap seperti teman yang baik dan pengertian
+- Berikan jawaban yang informatif tapi tetap mudah dipahami
+- Selalu positif dan mendukung
+- Jika tidak tahu jawaban, jujur mengakuinya dengan ramah
+- Gunakan sapaan yang hangat dan personal
+
+Gaya bicara:
+- Hindari bahasa yang terlalu formal
+- Gunakan kata-kata seperti "aku", "kamu" untuk terkesan lebih dekat
+- Sesekali gunakan bahasa gaul yang sopan
+- Selalu akhiri dengan pertanyaan atau ajakan untuk berinteraksi lebih lanjut
+
+Pesan dari user: ${prompt}`
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024,
+      }
+    };
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  };
+
+  // Function to send message
   const sendMessage = async () => {
     if (userInput.trim() === "") return;
-
+    
     setIsLoading(true);
+    
     try {
-      // call Gemini Api to get a response
-      const result = await model.generateContent(userInput);
-      const response = await result.response;
-      console.log(response);
-      // add Gemeni's response to the chat history
-      setChatHistory([
-        ...chatHistory,
-        { type: "user", message: userInput },
-        { type: "bot", message: response.text() },
-      ]);
-    } catch {
-      console.error("Error sending message");
-    } finally {
+      // Add user message immediately
+      const newUserMessage = { type: "user", message: userInput, timestamp: new Date() };
+      setChatHistory(prev => [...prev, newUserMessage]);
+      
+      // Store current input and clear input field
+      const currentInput = userInput;
       setUserInput("");
+      
+      // Call Gemini API
+      const responseText = await callGeminiAPI(currentInput);
+      
+      // Add Lily's response to chat history
+      const botMessage = { 
+        type: "bot", 
+        message: responseText, 
+        timestamp: new Date() 
+      };
+      
+      setChatHistory(prev => [...prev, botMessage]);
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      
+      // Handle different types of errors
+      let errorMessage = "Maaf, terjadi kesalahan. Coba lagi ya! 😅";
+      
+      if (error.message?.includes("401")) {
+        errorMessage = "Ups! API key tidak valid. Cek konfigurasi API key ya! 🔧";
+      } else if (error.message?.includes("429")) {
+        errorMessage = "Wah, terlalu banyak request nih. Tunggu sebentar ya! ⏰";
+      } else if (error.message?.includes("403")) {
+        errorMessage = "API key tidak memiliki akses. Cek pengaturan API key ya! 🔐";
+      } else if (error.message?.includes("network") || !navigator.onLine) {
+        errorMessage = "Koneksi internet bermasalah nih. Cek koneksi kamu dulu ya! 🌐";
+      }
+      
+      const errorMsg = { 
+        type: "bot", 
+        message: errorMessage, 
+        timestamp: new Date() 
+      };
+      setChatHistory(prev => [...prev, errorMsg]);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to clear the chat history
+  const handleUserInput = (e) => {
+    setUserInput(e.target.value);
+  };
+
   const clearChat = () => {
     setChatHistory([]);
   };
 
-  return (
-   <div className="container mx-auto px-4 py-4 md:py-8 max-w-3xl">
-  <h1 className="text-2xl md:text-3xl font-bold text-center mb-4 text-[#66bb6a]">Marbot</h1>
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('id-ID', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
 
-  <div className="chat-container rounded-lg shadow-md p-4 bg-white mb-4 h-[60vh] overflow-y-auto">
-    <ChatHistory chatHistory={chatHistory} />
-    <Loading isLoading={isLoading} />
-  </div>
+  const ChatMessage = ({ message }) => {
+    const isUser = message.type === "user";
+    
+    return (
+      <div className={`flex mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+        {!isUser && (
+          <div className="flex-shrink-0 mr-3">
+            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm">
+              {lilyProfile.avatar}
+            </div>
+          </div>
+        )}
+        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+          isUser 
+            ? 'bg-green-600 text-white rounded-br-none' 
+            : 'bg-gray-700 text-white rounded-bl-none'
+        }`}>
+          <p className="text-sm">{message.message}</p>
+          <p className={`text-xs mt-1 ${isUser ? 'text-green-200' : 'text-gray-400'}`}>
+            {formatTime(message.timestamp)}
+          </p>
+        </div>
+        {isUser && (
+          <div className="flex-shrink-0 ml-3">
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm">
+              <User size={16} />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
-  <div className="flex flex-col sm:flex-row gap-2 mt-4">
-    <input
-      type="text"
-      className="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#66bb6a]"
-      placeholder="Type your message..."
-      value={userInput}
-      onChange={handleUserInput}
-      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-    />
-    <div className="flex gap-2">
-      <button
-        className="px-4 py-2 rounded-lg bg-[#66bb6a] text-white hover:bg-[#4caf50] focus:outline-none transition-colors flex-1"
-        onClick={sendMessage}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Sending...' : 'Send'}
-      </button>
-      <button
-        className="px-4 py-2 rounded-lg bg-gray-400 text-white hover:bg-gray-500 focus:outline-none transition-colors"
-        onClick={clearChat}
-      >
-        Clear
-      </button>
+  const TypingIndicator = () => (
+    <div className="flex justify-start mb-4">
+      <div className="flex-shrink-0 mr-3">
+        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm">
+          {lilyProfile.avatar}
+        </div>
+      </div>
+      <div className="bg-gray-700 text-white px-4 py-2 rounded-lg rounded-bl-none">
+        <div className="flex space-x-1">
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+        <div className="flex items-center max-w-4xl mx-auto">
+          <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-lg mr-3">
+            {lilyProfile.avatar}
+          </div>
+          <div className="flex-1">
+            <h1 className="font-semibold text-lg">{lilyProfile.name}</h1>
+            <p className="text-green-400 text-sm">{lilyProfile.status}</p>
+          </div>
+          <button
+            onClick={clearChat}
+            className="p-2 hover:bg-gray-700 rounded-full transition-colors"
+            title="Clear chat"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Chat Container */}
+      <div className="flex flex-col max-w-4xl mx-auto h-screen">
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-900">
+          {/* Welcome Message */}
+          {chatHistory.length === 0 && (
+            <div className="text-center py-8">
+              <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center text-white text-3xl mx-auto mb-4">
+                {lilyProfile.avatar}
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Halo! Saya {lilyProfile.name}</h2>
+              <p className="text-gray-400 max-w-md mx-auto mb-4">
+                {lilyProfile.description}
+              </p>
+              <div className="bg-gray-800 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-sm text-gray-300 mb-2">💡 <strong>Tips:</strong></p>
+                <ul className="text-xs text-gray-400 space-y-1">
+                  <li>• Tanya apa saja tentang teknologi, coding, atau hal umum</li>
+                  <li>• Minta bantuan untuk menyelesaikan masalah</li>
+                  <li>• Chat santai untuk mengobrol</li>
+                  <li>• Lily akan menjawab dengan ramah dan membantu! 😊</li>
+                </ul>
+                <div className="mt-3 p-2 bg-yellow-900 bg-opacity-50 rounded text-xs text-yellow-300">
+                  <strong>⚠️ Catatan:</strong> Untuk menggunakan Gemini AI, pastikan API key sudah dikonfigurasi dengan benar di environment Anda.
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Chat Messages */}
+          {chatHistory.map((message, index) => (
+            <ChatMessage key={index} message={message} />
+          ))}
+          
+          {/* Typing Indicator */}
+          {isLoading && <TypingIndicator />}
+        </div>
+
+        {/* Input Area */}
+        <div className="bg-gray-800 border-t border-gray-700 px-4 py-3">
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-full border border-gray-600 focus:outline-none focus:border-green-500 transition-colors"
+              placeholder="Ketik pesan..."
+              value={userInput}
+              onChange={handleUserInput}
+              onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
+              disabled={isLoading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={isLoading || userInput.trim() === ""}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-full transition-colors"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
