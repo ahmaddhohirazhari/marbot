@@ -13,7 +13,7 @@ const App = () => {
 
   // inislize your Gemeni Api
   const genAI = new GoogleGenerativeAI(
-    "AIzaSyAjVQiyDAvMv8uqAmFdXUt8shPxULAUhGQ"
+    "AIzaSyCZ4gWGqacrmMx3Z54rTkNn1ABbZRzQ_04"
   );
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
