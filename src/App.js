@@ -6,13 +6,13 @@ const App = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Surti's profile
-  const SurtiProfile = {
-    name: 'Surti',
+  // Lily's profile
+  const lilyProfile = {
+    name: 'Lily',
     avatar: '👩‍💻',
     status: 'Online',
     description:
-      'Halo! Saya Surti, asisten AI yang ramah dan siap membantu Anda kapan saja! 😊',
+      'Halo! Saya Lily, asisten AI yang ramah dan siap membantu Anda kapan saja! 😊',
   };
 
   // Gemini AI Configuration (untuk implementasi di environment Anda)
@@ -27,7 +27,7 @@ const App = () => {
         {
           parts: [
             {
-              text: `Kamu adalah Surti, seorang asisten AI wanita muda yang sangat ramah, ceria, dan membantu. 
+              text: `Kamu adalah Lily, seorang asisten AI wanita muda yang sangat ramah, ceria, dan membantu. 
           
 Karakteristik kepribadianmu:
 - Selalu gunakan bahasa Indonesia yang hangat dan friendly
@@ -95,7 +95,7 @@ Pesan dari user: ${prompt}`,
       // Call Gemini API
       const responseText = await callGeminiAPI(currentInput);
 
-      // Add Surti's response to chat history
+      // Add Lily's response to chat history
       const botMessage = {
         type: 'bot',
         message: responseText,
@@ -157,7 +157,7 @@ Pesan dari user: ${prompt}`,
         {!isUser && (
           <div className="flex-shrink-0 mr-3">
             <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm">
-              {SurtiProfile.avatar}
+              {lilyProfile.avatar}
             </div>
           </div>
         )}
@@ -192,7 +192,7 @@ Pesan dari user: ${prompt}`,
     <div className="flex justify-start mb-4">
       <div className="flex-shrink-0 mr-3">
         <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-sm">
-          {SurtiProfile.avatar}
+          {lilyProfile.avatar}
         </div>
       </div>
       <div className="bg-gray-700 text-white px-4 py-2 rounded-lg rounded-bl-none">
@@ -212,16 +212,16 @@ Pesan dari user: ${prompt}`,
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+    <div className="h-screen bg-gray-900 text-white flex flex-col">
+      {/* Header - Fixed */}
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex-shrink-0 sticky top-0 z-10">
         <div className="flex items-center max-w-4xl mx-auto">
           <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-lg mr-3">
-            {SurtiProfile.avatar}
+            {lilyProfile.avatar}
           </div>
           <div className="flex-1">
-            <h1 className="font-semibold text-lg">{SurtiProfile.name}</h1>
-            <p className="text-green-400 text-sm">{SurtiProfile.status}</p>
+            <h1 className="font-semibold text-lg">{lilyProfile.name}</h1>
+            <p className="text-green-400 text-sm">{lilyProfile.status}</p>
           </div>
           <button
             onClick={clearChat}
@@ -233,74 +233,69 @@ Pesan dari user: ${prompt}`,
         </div>
       </div>
 
-      {/* Chat Container */}
-      <div className="flex flex-col max-w-4xl mx-auto h-screen">
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-900">
-          {/* Welcome Message */}
-          {chatHistory.length === 0 && (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center text-white text-3xl mx-auto mb-4">
-                {SurtiProfile.avatar}
-              </div>
-              <h2 className="text-xl font-semibold mb-2">
-                Halo! Saya {SurtiProfile.name}
-              </h2>
-              <p className="text-gray-400 max-w-md mx-auto mb-4">
-                {SurtiProfile.description}
+      {/* Messages Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 bg-gray-900 max-w-4xl mx-auto w-full">
+        {/* Welcome Message */}
+        {chatHistory.length === 0 && (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center text-white text-3xl mx-auto mb-4">
+              {lilyProfile.avatar}
+            </div>
+            <h2 className="text-xl font-semibold mb-2">
+              Halo! Saya {lilyProfile.name}
+            </h2>
+            <p className="text-gray-400 max-w-md mx-auto mb-4">
+              {lilyProfile.description}
+            </p>
+            <div className="bg-gray-800 rounded-lg p-4 max-w-md mx-auto">
+              <p className="text-sm text-gray-300 mb-2">
+                💡 <strong>Tips:</strong>
               </p>
-              <div className="bg-gray-800 rounded-lg p-4 max-w-md mx-auto">
-                <p className="text-sm text-gray-300 mb-2">
-                  💡 <strong>Tips:</strong>
-                </p>
-                <ul className="text-xs text-gray-400 space-y-1">
-                  <li>
-                    • Tanya apa saja tentang teknologi, coding, atau hal umum
-                  </li>
-                  <li>• Minta bantuan untuk menyelesaikan masalah</li>
-                  <li>• Chat santai untuk mengobrol</li>
-                  <li>• Surti akan menjawab dengan ramah dan membantu! 😊</li>
-                </ul>
-                <div className="mt-3 p-2 bg-yellow-900 bg-opacity-50 rounded text-xs text-yellow-300">
-                  <strong>⚠️ Catatan:</strong> Untuk menggunakan Gemini AI,
-                  pastikan API key sudah dikonfigurasi dengan benar di
-                  environment Anda.
-                </div>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>
+                  • Tanya apa saja tentang teknologi, coding, atau hal umum
+                </li>
+                <li>• Minta bantuan untuk menyelesaikan masalah</li>
+                <li>• Chat santai untuk mengobrol</li>
+                <li>• Lily akan menjawab dengan ramah dan membantu! 😊</li>
+              </ul>
+              <div className="mt-3 p-2 bg-yellow-900 bg-opacity-50 rounded text-xs text-yellow-300">
+                <strong>⚠️ Catatan:</strong> Untuk menggunakan Gemini AI,
+                pastikan API key sudah dikonfigurasi dengan benar di environment
+                Anda.
               </div>
             </div>
-          )}
-
-          {/* Chat Messages */}
-          {chatHistory.map((message, index) => (
-            <ChatMessage key={index} message={message} />
-          ))}
-
-          {/* Typing Indicator */}
-          {isLoading && <TypingIndicator />}
-        </div>
-
-        {/* Input Area */}
-        <div className="bg-gray-800 border-t border-gray-700 px-4 py-3">
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-full border border-gray-600 focus:outline-none focus:border-green-500 transition-colors"
-              placeholder="Ketik pesan..."
-              value={userInput}
-              onChange={handleUserInput}
-              onKeyPress={(e) =>
-                e.key === 'Enter' && !isLoading && sendMessage()
-              }
-              disabled={isLoading}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || userInput.trim() === ''}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-full transition-colors"
-            >
-              <Send size={18} />
-            </button>
           </div>
+        )}
+
+        {/* Chat Messages */}
+        {chatHistory.map((message, index) => (
+          <ChatMessage key={index} message={message} />
+        ))}
+
+        {/* Typing Indicator */}
+        {isLoading && <TypingIndicator />}
+      </div>
+
+      {/* Input Area - Fixed */}
+      <div className="bg-gray-800 border-t border-gray-700 px-4 py-3 flex-shrink-0 sticky bottom-0 z-10">
+        <div className="flex items-center space-x-2 max-w-4xl mx-auto">
+          <input
+            type="text"
+            className="flex-1 bg-gray-700 text-white px-4 py-3 rounded-full border border-gray-600 focus:outline-none focus:border-green-500 transition-colors placeholder-gray-400"
+            placeholder="Ketik pesan..."
+            value={userInput}
+            onChange={handleUserInput}
+            onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
+            disabled={isLoading}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={isLoading || userInput.trim() === ''}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-3 rounded-full transition-colors min-w-[48px] h-[48px] flex items-center justify-center"
+          >
+            <Send size={18} />
+          </button>
         </div>
       </div>
     </div>
