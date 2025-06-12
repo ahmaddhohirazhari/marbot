@@ -15,7 +15,7 @@ const App = () => {
   const genAI = new GoogleGenerativeAI(
     "AIzaSyCZ4gWGqacrmMx3Z54rTkNn1ABbZRzQ_04"
   );
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   // Function to handle user input
   const handleUserInput = (e) => {
