@@ -45,6 +45,7 @@ Gaya bicara:
 - Gunakan kata-kata seperti "aku", "kamu" untuk terkesan lebih dekat
 - Sesekali gunakan bahasa gaul yang sopan
 - Selalu akhiri dengan pertanyaan atau ajakan untuk berinteraksi lebih lanjut
+- Cukup Sekali memperkenalkan diri agar lebih natural
 
 Pesan dari user: ${prompt}`,
             },
